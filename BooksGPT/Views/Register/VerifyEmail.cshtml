@@ -1,0 +1,82 @@
+﻿@model BooksGPT.Models.EmailVerificationsModel
+
+@{
+    ViewData["Title"] = "Verify Code";
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Code - BookGPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen overflow-auto">
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="w-full max-w-xl space-y-6">
+            <div class="text-center">
+                <h1 class="text-3xl font-semibold">Verify Your Email</h1>
+                <p class="text-gray-400">Enter the 6-digit code we sent to your email</p>
+            </div>
+
+            <form method="post" class="bg-gray-900 p-8 rounded-2xl shadow-lg space-y-6 w-full">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-red-500 text-sm" })
+
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Verification Code</label>
+                    <input type="text" placeholder="123456" id="verificationCode"
+                           class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                           required maxlength="6" />
+                    <span class="text-red-500 text-sm"></span>
+                </div>
+
+                <button type="submit" id="submit-button"
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition duration-200">
+                    Verify Code
+                </button>
+
+                <div class="text-center text-sm text-gray-400">
+                    Didn’t get the code?
+                    <a href="/Resend" class="text-green-500 hover:underline">Resend</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+                $(document).ready(function () {
+                $('#submit-button').click(function (e) {
+                    e.preventDefault(); // Prevent default form submission
+
+                    var form = $(this).closest('form')[0];
+                    if (!form.checkValidity()) {
+                        form.reportValidity(); // Show validation errors
+                        return;
+                    }
+
+            var verificationCode = $('#verificationCode').val();
+
+                    $.ajax({
+                        url: '/Register/VerifyEmail2',
+                        type: 'POST',
+                data: { verificationCode: verificationCode },
+                        success: function () {
+                                window.location.href = '/';
+                        },
+                        error: function () {
+                            console.error('Error during registration:', arguments[0]);
+                            alert('An error occurred. Please try again.');
+                        }
+                    });
+                });
+            });
+    </script>
+}

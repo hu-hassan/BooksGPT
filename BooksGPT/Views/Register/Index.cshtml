@@ -1,0 +1,229 @@
+﻿@* @model IEnumerable<BooksGPT.Models.LoginModel>
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Register - BookGPT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #030712;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #111827;
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #d1d5db;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background-color: #202123;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: #10a37f;
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+            input[type="submit"]:hover {
+                background-color: #0e8c6c;
+            }
+
+        .login-link {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+            .login-link a {
+                color: #10a37f;
+                text-decoration: none;
+            }
+
+                .login-link a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create Account</h2>
+        <form method="post">
+
+            <label for="Email">Email</label>
+            <input type="email" id="Email" name="Email" required />
+
+            <input type="submit" value="Register" />
+        </form>
+        <div class="login-link">
+            Already have an account? <a href="/Login">Login</a>
+        </div>
+    </div>
+</body>
+</html> *@
+
+
+
+@model IEnumerable<BooksGPT.Models.UserModel>
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - GPT Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen overflow-auto">
+
+    <div class="flex items-center justify-center min-h-screen px-4">
+
+        <div class="w-full max-w-xl space-y-6">
+            <div class="text-center">
+                <h1 class="text-3xl font-semibold">Create Account</h1>
+                <p class="text-gray-400">Register to start using BookGPT</p>
+            </div>
+
+            <form method="post" class="bg-gray-900 p-8 rounded-2xl shadow-lg space-y-6">
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-red-500 text-sm" })
+
+                <div>
+                    <label class="block text-sm text-gray-300 mb-1">Full name</label>
+                    <input type="text" id="name" name="name" placeholder="Your name" required
+                           class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <span class="text-red-500 text-sm"></span>
+
+                    <label  class="block text-sm text-gray-300 mb-1">Email address</label>
+                    <input  type="email" placeholder="you@example.com" id="email" name="email"
+                           class="w-full px-4 py-2 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500" required />
+                    <span  class="text-red-500 text-sm"></span>
+                </div>
+
+                <button type="submit" id="submit-button"
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition duration-200">
+                    Register
+                </button>
+
+                <div class="text-center text-sm text-gray-400">
+                    Already have an account?
+                    <a href="/Login" class="text-green-500 hover:underline">Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // $(document).ready(function () {
+        //     $('#submit-button').click(function (e) {
+        //         e.preventDefault(); // Prevent default form submission
+
+        //         var email = $('#email').val();
+
+        //         $.ajax({
+        //             url: '/Register/GoToPassword',
+        //             type: 'POST',
+        //             data: { email: email },
+        //             success: function () {
+        //                 window.location.href = '/Register/Password';
+        //             },
+        //             error: function () {
+        //                 alert('An error occurred. Please try again.');
+        //             }
+        //         });
+        //     });
+        // });
+
+                $(document).ready(function () {
+            $('#submit-button').click(function (e) {
+                e.preventDefault(); // Prevent default form submission
+
+                var email = $('#email').val();
+                var name = $('#name').val();
+
+                $.ajax({
+                    url: '/Register/GoToPassword',
+                    type: 'POST',
+                    data: { email: email, name: name },
+                    success: function (response) {
+                        if (response.exists) {
+                            // Show alert and redirect to login on OK
+                            alert('You already have an account. Redirecting to login page.');
+                            window.location.href = '/Login';
+                        } else {
+                            window.location.href = '/Register/Password';
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+}
