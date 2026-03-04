@@ -40,20 +40,6 @@ namespace BooksGPT.Controllers
             return View(await _context.Users.ToListAsync());
         }
 
-        //[HttpPost]
-        //public IActionResult GoToPassword(string email)
-        //{
-        //    // Set the username as an HTTP-only cookie
-        //    Response.Cookies.Append("email", email, new Microsoft.AspNetCore.Http.CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true, // Set to true if your site uses HTTPS
-        //        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict
-        //    });
-        //    _logger.LogInformation("Email set in cookie: {Email}", email);
-        //    // Redirect to the Password page (GET: Register/Password)
-        //    return RedirectToAction("Password");
-        //}
         [HttpPost]
         public async Task<IActionResult> GoToPassword(string email, string name)
         {

@@ -103,58 +103,6 @@ namespace BooksGPT
             }
         }
 
-        //public (string Title, string Authors, string Description) GetBookDescription(string title)
-        //{
-        //    using var httpClient = new HttpClient();
-        //    int maxResults = 20;
-        //    int startIndex = 0;
-        //    int maxTries = 4; // 20, 30, 40, 50 (Google Books API max is 40 per request, but you can paginate)
-        //    int tries = 0;
-
-        //    while (tries < maxTries)
-        //    {
-        //        var url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(title)}&maxResults={maxResults}&startIndex={startIndex}";
-        //        var response = httpClient.GetAsync(url).Result;
-        //        if (!response.IsSuccessStatusCode)
-        //            return (null, null, null);
-
-        //        var json = response.Content.ReadAsStringAsync().Result;
-        //        using var doc = JsonDocument.Parse(json);
-
-        //        if (doc.RootElement.TryGetProperty("items", out var items) && items.GetArrayLength() > 0)
-        //        {
-        //            foreach (var item in items.EnumerateArray())
-        //            {
-        //                var volumeInfo = item.GetProperty("volumeInfo");
-        //                string bookTitle = volumeInfo.TryGetProperty("title", out var t) ? t.GetString() : "";
-
-        //                // Use title for duplicate check
-        //                if (ReturnedTitles.Contains(bookTitle))
-        //                    continue;
-
-        //                string authors = volumeInfo.TryGetProperty("authors", out var a) && a.ValueKind == JsonValueKind.Array
-        //                    ? string.Join(", ", a.EnumerateArray().Select(x => x.GetString()))
-        //                    : "Unknown author";
-        //                string description = volumeInfo.TryGetProperty("description", out var d)
-        //                    ? d.GetString()
-        //                    : "No description available.";
-
-        //                ReturnedTitles.Add(bookTitle);
-
-        //                return (bookTitle, authors, description);
-        //            }
-        //        }
-
-        //        // If not found, increase startIndex and maxResults for next batch
-        //        startIndex += maxResults;
-        //        maxResults = 10; // After the first batch, fetch 10 at a time
-        //        tries++;
-        //    }
-
-        //    // If no matching book is found after all tries, return nulls
-        //    return (null, null, null);
-        //}
-
         public (string Title, string Authors, string Description) GetBookDescription(string title)
         {
             Log.Info($"Searching for book: {title}");

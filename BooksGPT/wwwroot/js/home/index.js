@@ -161,9 +161,13 @@
                     $('.history-item').removeClass('active');
                     
                     $('.history-list').prepend(newChatHtml);
+                    
+                    // Also add to mobile sidebar
+                    $('.mobile-sidebar-list').prepend(newChatHtml);
 
                     // Remove "No chat history" message if it exists
                     $('.history-list').find('.history-item:contains("No chat history")').remove();
+                    $('.mobile-sidebar-list').find('.history-item:contains("No chat history")').remove();
                 }
             },
             error: function () {
@@ -192,6 +196,10 @@
             alert('Error starting new chat');
         });
     }
+    
+    // Expose startNewChat globally for mobile sidebar
+    window.startNewChat = startNewChat;
+    window.loadChatHistory = loadChatHistory;
 
     // Initialize on document ready
     $(function () {
@@ -273,6 +281,9 @@
                 setCookie('avatarColor', newColor);
                 $('#left-user-name').text(newName || 'Guest');
                 $('#left-avatar').css('background', newColor || '#6b7280');
+                // Also update mobile sidebar
+                $('#mobile-user-name').text(newName || 'Guest');
+                $('#mobile-avatar').css('background', newColor || '#6b7280');
                 $('#edit-profile-modal').hide();
             }).fail(function () {
                 alert('Error saving profile');
@@ -304,7 +315,8 @@
 
             $.post('/Home/DeleteChat', { id: id }, function (resp) {
                 if (resp && resp.success) {
-                    $historyItem.remove();
+                    // Remove from both sidebars
+                    $('.history-item[data-id="' + id + '"]').remove();
                     if (String(currentChatId) === String(id)) {
                         // Current chat was deleted - start new chat
                         startNewChat();
@@ -325,6 +337,114 @@
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+            }
+        });
+
+        // =====================
+        // Mobile Sidebar Logic
+        // =====================
+
+        function checkMobile() {
+            if (window.innerWidth <= 768) {
+                $('#mobile-sidebar-btn').show();
+            } else {
+                $('#mobile-sidebar-btn').hide();
+                closeMobileSidebar();
+            }
+        }
+
+        function openMobileSidebar() {
+            $('#mobile-sidebar').addClass('open');
+            $('#mobile-sidebar-overlay').addClass('open');
+            $('body').css('overflow', 'hidden');
+        }
+
+        function closeMobileSidebar() {
+            $('#mobile-sidebar').removeClass('open');
+            $('#mobile-sidebar-overlay').removeClass('open');
+            $('body').css('overflow', '');
+            $('#mobile-user-menu').hide();
+            $('.mobile-sidebar .history-menu').hide();
+        }
+
+        // Check mobile on load and resize
+        checkMobile();
+        $(window).on('resize', checkMobile);
+
+        // Open mobile sidebar
+        $(document).on('click', '#mobile-sidebar-btn', function(e) {
+            e.stopPropagation();
+            openMobileSidebar();
+        });
+
+        // Close mobile sidebar
+        $(document).on('click', '#mobile-sidebar-close, #mobile-sidebar-overlay', function() {
+            closeMobileSidebar();
+        });
+
+        // Selecting a chat closes sidebar and loads via AJAX
+        $(document).on('click', '.mobile-sidebar .history-item .history-title', function() {
+            var chatId = $(this).closest('.history-item').data('id');
+            closeMobileSidebar();
+            if (chatId) {
+                loadChatHistory(chatId);
+            }
+        });
+
+        // Menu toggle for mobile sidebar items
+        $(document).on('click', '.mobile-sidebar .history-menu-btn', function(e) {
+            e.stopPropagation();
+            var menu = $(this).siblings('.history-menu');
+            $('.mobile-sidebar .history-menu').not(menu).hide();
+            menu.toggle();
+        });
+
+        // New chat from mobile sidebar
+        $(document).on('click', '#mobile-new-chat-btn', function() {
+            closeMobileSidebar();
+            startNewChat();
+        });
+
+        // Mobile user menu toggle
+        $(document).on('click', '#mobile-user-toggle', function(e) {
+            e.stopPropagation();
+            $('#mobile-user-menu').toggle();
+        });
+
+        // Mobile edit profile
+        $(document).on('click', '.mobile-edit-profile', function(e) {
+            e.preventDefault();
+            closeMobileSidebar();
+            $.get('/Home/GetProfile', function(resp) {
+                if (!resp || !resp.success) {
+                    alert(resp?.error || 'Failed');
+                    return;
+                }
+                $('#profile-name').val(resp.name || '');
+                $('#profile-username').val(resp.username || '');
+                try {
+                    $('#profile-color').val(resp.avatarColor || '#10a37f');
+                } catch(err) {
+                    $('#profile-color').val('#10a37f');
+                }
+                $('#edit-profile-modal').show();
+            });
+        });
+
+        // Mobile logout
+        $(document).on('click', '.mobile-logout-link', function(e) {
+            e.preventDefault();
+            closeMobileSidebar();
+            $.post('/Login/Logout', function() {
+                window.location.href = '/login';
+            });
+        });
+
+        // Close menus when clicking elsewhere in sidebar
+        $(document).on('click', '#mobile-sidebar', function(e) {
+            if (!$(e.target).closest('.history-menu-btn, .history-menu, #mobile-user-toggle, #mobile-user-menu').length) {
+                $('.mobile-sidebar .history-menu').hide();
+                $('#mobile-user-menu').hide();
             }
         });
     });

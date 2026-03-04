@@ -162,6 +162,12 @@ body {
     background-color: #1e1e1e;
     text-align: center;
     border-bottom: 1px solid #2c2c2c;
+    position: relative;
+}
+
+/* Mobile sidebar button - hidden on desktop, shown on mobile */
+#mobile-sidebar-btn {
+    display: none;
 }
 
 .chat-box {
@@ -306,4 +312,266 @@ pre {
 
 code {
     padding: 2px 6px;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+    .chat-wrapper {
+        flex-direction: column;
+    }
+
+    /* Hide desktop sidebar on mobile */
+    .chat-history {
+        display: none;
+    }
+
+    /* Show mobile menu button */
+    #mobile-sidebar-btn {
+        display: block;
+    }
+
+    .chat-content {
+        width: 100%;
+        height: 100vh;
+    }
+
+    .chat-header {
+        padding: 14px;
+        position: relative;
+    }
+
+    .chat-header h1 {
+        font-size: 20px;
+    }
+
+    .chat-box {
+        padding: 12px;
+    }
+
+    .message {
+        max-width: 90%;
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+
+    .input-area {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    #user-input {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    #send-button {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    .modal-box {
+        width: 90%;
+        padding: 16px;
+    }
+
+    .history-item {
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+
+    #left-user-menu {
+        width: 180px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .chat-header h1 {
+        font-size: 18px;
+    }
+
+    .chat-header p {
+        font-size: 12px;
+    }
+
+    .message {
+        max-width: 95%;
+        font-size: 13px;
+    }
+
+    #user-input {
+        font-size: 13px;
+    }
+
+    #send-button {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Mobile Sidebar (ChatGPT style - slides from left) */
+.mobile-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0);
+    z-index: 1999;
+    pointer-events: none;
+    transition: background 0.3s ease;
+}
+
+.mobile-sidebar-overlay.open {
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+.mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    background: #0f0f0f;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-sidebar.open {
+    transform: translateX(0);
+}
+
+.mobile-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px;
+    border-bottom: 1px solid #222;
+}
+
+.mobile-new-chat-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    flex: 1;
+    margin-right: 8px;
+}
+
+.mobile-new-chat-btn:hover {
+    background: #1a1a1a;
+    border-color: #444;
+}
+
+.mobile-sidebar-close {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.mobile-sidebar-close:hover {
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.mobile-sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Use same history-item styles in mobile sidebar */
+.mobile-sidebar .history-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background-color: transparent;
+    margin-bottom: 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-left: none;
+}
+
+.mobile-sidebar .history-item:hover {
+    background-color: #1a1a1a;
+}
+
+.mobile-sidebar .history-item.active {
+    background-color: #1a3d2e;
+}
+
+.mobile-sidebar .history-item.active .history-title {
+    color: #10a37f;
+    font-weight: 600;
+}
+
+.mobile-sidebar .history-title {
+    font-size: 14px;
+    color: #e5e7eb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobile-sidebar-user {
+    padding: 12px;
+    border-top: 1px solid #222;
+    position: relative;
+}
+
+.mobile-login-prompt {
+    text-align: center;
+    padding: 24px 16px;
+    color: #9ca3af;
+}
+
+.mobile-login-prompt a {
+    color: #10a37f;
+    text-decoration: none;
+}
+
+.mobile-login-prompt a:hover {
+    text-decoration: underline;
+}
+
+/* Scrollbar for mobile sidebar */
+.mobile-sidebar-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mobile-sidebar-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mobile-sidebar-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+.mobile-sidebar-list:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
 }

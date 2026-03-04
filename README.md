@@ -1,4 +1,4 @@
-# :books: BooksGPT
+﻿# :books: BooksGPT
 
 An AI-powered book discovery and chat application built with ASP.NET Core and Google Gemini API.
 
@@ -57,15 +57,15 @@ An AI-powered book discovery and chat application built with ASP.NET Core and Go
 
 ```
 BooksGPT/
-??? BooksGPT/                    # Main web application
-?   ??? Controllers/             # MVC Controllers
-?   ??? Models/                  # Database models & DbContext
-?   ??? Views/                   # Razor views
-?   ??? Handlers/                # Business logic handlers
-?   ??? Migrations/              # EF Core migrations
-??? BooksGPT.AppHost/            # .NET Aspire host
-??? BooksGPT.ServiceDefaults/    # Shared service configurations
-??? README.md
+|-- BooksGPT/                    # Main web application
+|   |-- Controllers/             # MVC Controllers
+|   |-- Models/                  # Database models & DbContext
+|   |-- Views/                   # Razor views
+|   |-- Handlers/                # Business logic handlers
+|   +-- Migrations/              # EF Core migrations
+|-- BooksGPT.AppHost/            # .NET Aspire host
+|-- BooksGPT.ServiceDefaults/    # Shared service configurations
++-- README.md
 ```
 
 ## License
