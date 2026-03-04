@@ -1,14 +1,14 @@
-# ?? BooksGPT
+# :books: BooksGPT
 
 An AI-powered book discovery and chat application built with ASP.NET Core and Google Gemini API.
 
 ## Features
 
-- ?? **AI-Powered Chat** - Chat with Gemini AI about books, get recommendations, and discuss literature
-- ?? **Book Search** - Search and discover books using Google Books API
-- ?? **User Authentication** - Register, login, and manage your profile with email verification
-- ?? **Chat History** - Your conversations are saved for future reference
-- ?? **Modern UI** - Clean, responsive interface
+- :robot: **AI-Powered Chat** - Chat with Gemini AI about books, get recommendations, and discuss literature
+- :mag: **Book Search** - Search and discover books using Google Books API
+- :bust_in_silhouette: **User Authentication** - Register, login, and manage your profile with email verification
+- :speech_balloon: **Chat History** - Your conversations are saved for future reference
+- :art: **Modern UI** - Clean, responsive interface
 
 ## Tech Stack
 
