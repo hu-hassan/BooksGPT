@@ -74,6 +74,6 @@ This project is for educational purposes.
 
 ## Author
 
-**Hassan** - [GitHub](https://github.com/hu-hassan)
+**Hassan** - [GitHub](https://github.com/hu-hassan), [LinkedIn](https://www.linkedin.com/in/hu-hassan)]
 
 
