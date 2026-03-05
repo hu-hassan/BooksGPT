@@ -73,6 +73,9 @@
 
     // Load chat history by ID
     function loadChatHistory(chatId) {
+        // Hide any open history menus immediately
+        $('.history-menu').hide();
+        
         $.get('/Home/GetChatHistoryById', { id: chatId }, function (data) {
             if (!data || !data.success) {
                 // If redirect flag is set, chat is incomplete - start new chat
@@ -206,11 +209,13 @@
         // Render reload data if exists
         renderReloadData();
 
-        // History item click - load chat
-        $(document).on('click', '.history-item', function (e) {
+        // History item click - load chat (desktop sidebar only, not mobile)
+        $(document).on('click', '.history-list .history-item', function (e) {
             if ($(e.target).closest('.history-menu, .history-menu-btn, .delete-chat').length) return;
             var id = $(this).data('id');
             console.debug('history-item clicked, id=', id);
+            // Hide any open history menus immediately when clicking a chat
+            $('.history-menu').hide();
             if (id) loadChatHistory(id);
         });
 
@@ -297,8 +302,10 @@
             }
         });
 
-        // History menu toggle
+        // History menu toggle (desktop only — mobile has its own handler below)
         $(document).on('click', '.history-menu-btn', function (e) {
+            // Skip if inside mobile sidebar — handled separately with fixed positioning
+            if ($(this).closest('.mobile-sidebar-list').length) return;
             e.stopPropagation();
             var $menu = $(this).siblings('.history-menu');
             $('.history-menu').not($menu).hide();
@@ -364,7 +371,7 @@
             $('#mobile-sidebar-overlay').removeClass('open');
             $('body').css('overflow', '');
             $('#mobile-user-menu').hide();
-            $('.mobile-sidebar .history-menu').hide();
+            $('.mobile-sidebar-list .history-menu').hide();
         }
 
         // Check mobile on load and resize
@@ -382,21 +389,29 @@
             closeMobileSidebar();
         });
 
-        // Selecting a chat closes sidebar and loads via AJAX
-        $(document).on('click', '.mobile-sidebar .history-item .history-title', function() {
-            var chatId = $(this).closest('.history-item').data('id');
+        // Selecting a chat closes sidebar and loads via AJAX (clicking anywhere on the card)
+        $(document).on('click', '.mobile-sidebar-list .history-item', function(e) {
+            e.stopPropagation();
+            // Ignore clicks on menu button, delete button, or the open menu itself
+            if ($(e.target).closest('.history-menu-btn, .history-menu, .delete-chat').length) return;
+            var chatId = $(this).data('id');
+            // Hide menus before closing sidebar
+            $('.mobile-sidebar-list .history-menu').hide();
             closeMobileSidebar();
             if (chatId) {
                 loadChatHistory(chatId);
             }
         });
 
-        // Menu toggle for mobile sidebar items
-        $(document).on('click', '.mobile-sidebar .history-menu-btn', function(e) {
+        // Menu toggle for mobile sidebar items — same as desktop, just toggle
+        $(document).on('click', '.mobile-sidebar-list .history-menu-btn', function(e) {
+            e.preventDefault();
             e.stopPropagation();
-            var menu = $(this).siblings('.history-menu');
-            $('.mobile-sidebar .history-menu').not(menu).hide();
-            menu.toggle();
+            e.stopImmediatePropagation();
+            var $menu = $(this).siblings('.history-menu');
+            // Hide all other mobile menus
+            $('.mobile-sidebar-list .history-menu').not($menu).hide();
+            $menu.toggle();
         });
 
         // New chat from mobile sidebar
@@ -442,8 +457,8 @@
 
         // Close menus when clicking elsewhere in sidebar
         $(document).on('click', '#mobile-sidebar', function(e) {
-            if (!$(e.target).closest('.history-menu-btn, .history-menu, #mobile-user-toggle, #mobile-user-menu').length) {
-                $('.mobile-sidebar .history-menu').hide();
+            if (!$(e.target).closest('.history-item, .history-menu-btn, .history-menu, #mobile-user-toggle, #mobile-user-menu').length) {
+                $('.mobile-sidebar-list .history-menu').hide();
                 $('#mobile-user-menu').hide();
             }
         });

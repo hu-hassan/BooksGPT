@@ -509,7 +509,7 @@ code {
     align-items: center;
     padding: 10px 12px;
     background-color: transparent;
-    margin-bottom: 2px;
+    margin-bottom: 0;
     border-radius: 8px;
     cursor: pointer;
     transition: background 0.2s;
