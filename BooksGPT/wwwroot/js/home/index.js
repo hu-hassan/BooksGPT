@@ -155,8 +155,8 @@
                     var newChatHtml = '<div class="history-item active" data-id="' + data.newChat.id + '">' +
                         '<div class="history-title" style="flex:1;cursor:pointer;">' + escapeHtml(data.newChat.title) + '</div>' +
                         '<div style="margin-left:8px;position:relative;">' +
-                        '<button class="history-menu-btn" style="background:transparent;border:none;color:#9ca3af;cursor:pointer;padding:4px 6px;">?</button>' +
-                        '<div class="history-menu" style="display:none;position:absolute;right:0;bottom:28px;background:#0b0b0b;padding:6px;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.6);z-index:1200;">' +
+                        '<button class="history-menu-btn" style="background:transparent;border:none;color:#9ca3af;cursor:pointer;padding:4px 6px;">&#x22EF;</button>' +
+                        '<div class="history-menu" style="display:none;position:absolute;right:0;top:100%;background:#0b0b0b;padding:6px;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.6);z-index:1200;">' +
                         '<button class="delete-chat" style="background:transparent;border:none;color:#fff;cursor:pointer;padding:6px 8px;">Delete</button>' +
                         '</div></div></div>';
                     

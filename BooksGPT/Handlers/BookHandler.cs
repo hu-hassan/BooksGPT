@@ -24,7 +24,22 @@ namespace BooksGPT.Handlers
             (string AiReply, string IsBookSelected, List<string> UserQuestions, List<string> BotAnswers, string BookTitle, string CurrentChatId, string author) session, 
             string userInput)
         {
-            string aiReply = _utils.GetBook(userInput);
+            // If the user said "no" (rejecting a suggested book), re-search using the
+            // original book title (the first user question) so the Google Books API
+            // returns the next matching result instead of searching for the word "no".
+            string searchTitle = userInput;
+            if (session.UserQuestions != null && session.UserQuestions.Count > 0)
+            {
+                string firstQuestion = session.UserQuestions[0];
+                var noList = new List<string> { "no", "naah", "not" };
+                var normalized = userInput.Trim().ToLowerInvariant();
+                if (noList.Any(n => n == normalized))
+                {
+                    searchTitle = firstQuestion;
+                }
+            }
+
+            string aiReply = _utils.GetBook(searchTitle);
             var http = _accessor.HttpContext;
 
             http.Response.Cookies.Append("canSayNo", "yes", new CookieOptions
