@@ -188,7 +188,7 @@ namespace BooksGPT.Controllers
             var smtpClient = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,
-                Credentials = new NetworkCredential("hassan.hu.usman@gmail.com", "gcayiepgicqlazso"),
+                Credentials = new NetworkCredential("hassan.hu.usman@gmail.com", "your-key"),
                 EnableSsl = true,
             };
 
