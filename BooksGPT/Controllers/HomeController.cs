@@ -12,6 +12,9 @@ using System.Text.Json;
 using System.Collections.Generic;
 using System;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using BooksGPT.Models;
 
 namespace BooksGPT.Controllers
@@ -53,32 +56,7 @@ namespace BooksGPT.Controllers
         public IActionResult Index()
         {
             string aiReply = AppConstants.DEFAULT_CHAT_MESSAGE;
-            var email = Request.Cookies[AppConstants.COOKIE_EMAIL];
-            
-            // If user is logged in, ensure name and avatarColor cookies are set from DB
-            if (!string.IsNullOrEmpty(email))
-            {
-                try
-                {
-                    var user = _context.Users.FirstOrDefault(u => u.Email == email);
-                    if (user != null)
-                    {
-                        var cookieOptions = new CookieOptions
-                        {
-                            HttpOnly = true,
-                            Secure = true,
-                            SameSite = SameSiteMode.Strict
-                        };
-                        
-                        if (!string.IsNullOrEmpty(user.Name))
-                            Response.Cookies.Append(AppConstants.COOKIE_NAME, user.Name, cookieOptions);
-                        
-                        if (!string.IsNullOrEmpty(user.AvatarColor))
-                            Response.Cookies.Append(AppConstants.COOKIE_AVATAR_COLOR, user.AvatarColor, cookieOptions);
-                    }
-                }
-                catch { }
-            }
+            var email = User.FindFirstValue(ClaimTypes.Email);
 
             // Check if there's an existing chat in session (page reload scenario)
             var existingChatId = _sessionHandler.GetSessionValue(AppConstants.SESSION_CURRENT_CHAT_ID);
@@ -130,7 +108,7 @@ namespace BooksGPT.Controllers
         {
             try
             {
-                var email = Request.Cookies[AppConstants.COOKIE_EMAIL] ?? "";
+                var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
                 Request.Cookies.TryGetValue(AppConstants.COOKIE_CAN_SAY_NO, out var canSayNo);
                 var isOldChat = _sessionHandler.GetSessionValue(AppConstants.SESSION_IS_OLD_CHAT);
                 if (string.IsNullOrEmpty(isOldChat)) isOldChat = "no";
@@ -203,7 +181,7 @@ namespace BooksGPT.Controllers
         [HttpPost]
         public IActionResult NewChat()
         {
-            var email = Request.Cookies[AppConstants.COOKIE_EMAIL];
+            var email = User.FindFirstValue(ClaimTypes.Email);
 
             // Reset session and cookie
             _sessionHandler.ResetSession();
@@ -227,7 +205,7 @@ namespace BooksGPT.Controllers
         [HttpGet]
         public IActionResult GetChatHistoryById(int id)
         {
-            var email = Request.Cookies[AppConstants.COOKIE_EMAIL];
+            var email = User.FindFirstValue(ClaimTypes.Email);
             var (success, redirect, userQuestions, botAnswers) = _chatHistoryHandler.GetChatHistoryById(id, email);
             
             if (!success)
@@ -240,7 +218,7 @@ namespace BooksGPT.Controllers
         [HttpPost]
         public IActionResult DeleteChat(int id)
         {
-            var email = Request.Cookies[AppConstants.COOKIE_EMAIL];
+            var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrWhiteSpace(email))
                 return Json(new { success = false, error = "Not logged in" });
 
@@ -263,7 +241,7 @@ namespace BooksGPT.Controllers
         [HttpGet]
         public IActionResult GetProfile()
         {
-            var email = Request.Cookies[AppConstants.COOKIE_EMAIL];
+            var email = User.FindFirstValue(ClaimTypes.Email);
             var (success, name, username, avatarColor) = _profileHandler.GetProfile(email);
             
             if (!success)
@@ -274,9 +252,9 @@ namespace BooksGPT.Controllers
 
         // Update logged-in user's profile
         [HttpPost]
-        public IActionResult UpdateProfile([FromForm] string name, [FromForm] string username, [FromForm] string avatarColor)
+        public async Task<IActionResult> UpdateProfile([FromForm] string name, [FromForm] string username, [FromForm] string avatarColor)
         {
-            var email = Request.Cookies[AppConstants.COOKIE_EMAIL];
+            var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
                 return Json(new { success = false, error = "Not logged in" });
 
@@ -286,17 +264,20 @@ namespace BooksGPT.Controllers
                 if (!success)
                     return Json(new { success = false, error = "User not found" });
 
-                // Update cookies so UI reflects changes immediately
-                var cookieOptions = new CookieOptions
+                var claims = new List<Claim>
                 {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
+                    new Claim(ClaimTypes.Email, email),
+                    new Claim(ClaimTypes.Name, name ?? ""),
+                    new Claim("AvatarColor", avatarColor ?? "#6b7280"),
+                    new Claim(ClaimTypes.GivenName, username ?? "")
                 };
-                Response.Cookies.Append(AppConstants.COOKIE_NAME, name ?? "", cookieOptions);
-                Response.Cookies.Append(AppConstants.COOKIE_AVATAR_COLOR, avatarColor ?? "", cookieOptions);
 
-                return Json(new { success = true });
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                return Json(new { success = true, name = name ?? "", avatarColor = avatarColor ?? "" });
             }
             catch (Exception ex)
             {

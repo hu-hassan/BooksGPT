@@ -36,11 +36,13 @@ An AI-powered book discovery and chat application built with ASP.NET Core and Go
    cd BooksGPT
    ```
 
-2. **Configure API Keys** (see [README-USER-SECRETS.md](README-USER-SECRETS.md) for details)
+2. **Configure Secrets** (see [README-USER-SECRETS.md](README-USER-SECRETS.md) for details)
    ```bash
    cd BooksGPT
    dotnet user-secrets set "ApiKeys:GoogleBooks" "YOUR_GOOGLE_BOOKS_KEY"
    dotnet user-secrets set "ApiKeys:Gemini" "YOUR_GEMINI_KEY"
+   dotnet user-secrets set "Smtp:Email" "YOUR_SMTP_EMAIL"
+   dotnet user-secrets set "Smtp:Password" "YOUR_SMTP_PASSWORD"
    ```
 
 3. **Apply database migrations**

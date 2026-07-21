@@ -4,11 +4,11 @@
 }
 
 @{
-    var isLogin = Context.Request.Cookies["isLogin"];
+    var isLoggedIn = User.Identity?.IsAuthenticated == true;
     var currentChatIdFromSession = Context.Session.GetString("CurrentChatId") ?? "";
-    var cookieName = Context.Request.Cookies["name"] ?? "";
-    var cookieAvatar = Context.Request.Cookies["avatarColor"] ?? "";
-    var avatarInitial = string.IsNullOrWhiteSpace(cookieName) ? "U" : cookieName.Substring(0,1).ToUpper();
+    var displayName = isLoggedIn ? (User.FindFirstValue(ClaimTypes.Name) ?? "") : "";
+    var avatarColor = isLoggedIn ? (User.FindFirstValue("AvatarColor") ?? "#6b7280") : "#6b7280";
+    var avatarInitial = string.IsNullOrWhiteSpace(displayName) ? "U" : displayName.Substring(0,1).ToUpper();
 }
 
 <!DOCTYPE html>
@@ -28,7 +28,7 @@
             </div>
 
             <div class="history-list" style="overflow-y:auto;flex:1;padding-right:6px;margin-top:8px;">
-                @if (isLogin == null || isLogin.ToLower() != "true")
+                @if (!isLoggedIn)
                 {
                     <div class="login-prompt">
                         <p>Please <a href="/login">login</a> in order to view your chat history.</p>
@@ -64,9 +64,9 @@
             <div style="padding:12px;border-top:1px solid #222;margin-top:8px;">
                 <div id="left-user-panel" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                     <div style="display:flex;align-items:center;gap:12px;">
-                        <div id="left-avatar" style="width:40px;height:40px;border-radius:50%;background:@(string.IsNullOrWhiteSpace(cookieAvatar) ? "#6b7280" : cookieAvatar);display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:16px;">@avatarInitial</div>
+                        <div id="left-avatar" style="width:40px;height:40px;border-radius:50%;background:@avatarColor;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:16px;">@avatarInitial</div>
                         <div>
-                            <div id="left-user-name" style="font-size:14px;color:#e5e7eb;">@(string.IsNullOrWhiteSpace(cookieName) ? "Guest" : cookieName)</div>
+                            <div id="left-user-name" style="font-size:14px;color:#e5e7eb;">@(string.IsNullOrWhiteSpace(displayName) ? "Guest" : displayName)</div>
                             <div style="font-size:12px;color:#9ca3af;">Profile & settings</div>
                         </div>
                     </div>
@@ -76,7 +76,10 @@
                 </div>
                 <div id="left-user-menu" style="display:none;background:#0b0b0b;color:#fff;padding:8px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.6);">
                     <div style="margin-bottom:8px;"><a href="#" id="left-edit-profile" style="color:#fff;text-decoration:none;">Edit profile</a></div>
-                    <div><a href="#" id="left-logout-link" style="color:#fff;text-decoration:none;">Logout</a></div>
+                    @if (isLoggedIn)
+                    {
+                        <div><a href="#" id="left-logout-link" style="color:#fff;text-decoration:none;">Logout</a></div>
+                    }
                 </div>
             </div>
         </div>
@@ -108,7 +111,7 @@
                 </div>
 
                 <div class="mobile-sidebar-list">
-                    @if (isLogin == null || isLogin.ToLower() != "true")
+                @if (!isLoggedIn)
                     {
                         <div class="mobile-login-prompt">
                             <p>Please <a href="/login">login</a> to view your chat history.</p>
@@ -144,9 +147,9 @@
                 <div class="mobile-sidebar-user">
                     <div id="mobile-user-panel" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                         <div style="display:flex;align-items:center;gap:12px;">
-                            <div id="mobile-avatar" style="width:36px;height:36px;border-radius:50%;background:@(string.IsNullOrWhiteSpace(cookieAvatar) ? "#6b7280" : cookieAvatar);display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:14px;">@avatarInitial</div>
+                            <div id="mobile-avatar" style="width:36px;height:36px;border-radius:50%;background:@avatarColor;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:14px;">@avatarInitial</div>
                             <div>
-                                <div id="mobile-user-name" style="font-size:14px;color:#e5e7eb;">@(string.IsNullOrWhiteSpace(cookieName) ? "Guest" : cookieName)</div>
+                                <div id="mobile-user-name" style="font-size:14px;color:#e5e7eb;">@(string.IsNullOrWhiteSpace(displayName) ? "Guest" : displayName)</div>
                                 <div style="font-size:11px;color:#9ca3af;">Profile & settings</div>
                             </div>
                         </div>
@@ -154,7 +157,10 @@
                     </div>
                     <div id="mobile-user-menu" style="display:none;background:#0b0b0b;color:#fff;padding:8px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.6);position:absolute;bottom:70px;left:12px;right:12px;z-index:1500;">
                         <div style="margin-bottom:8px;"><a href="#" class="mobile-edit-profile" style="color:#fff;text-decoration:none;">Edit profile</a></div>
-                        <div><a href="#" class="mobile-logout-link" style="color:#fff;text-decoration:none;">Logout</a></div>
+                    @if (isLoggedIn)
+                        {
+                            <div><a href="#" class="mobile-logout-link" style="color:#fff;text-decoration:none;">Logout</a></div>
+                        }
                     </div>
                 </div>
             </div>
@@ -221,8 +227,7 @@
     <script src="~/js/home/index.js" asp-append-version="true"></script>
 
     @{
-        var isLoginCookieForPopup = Context.Request.Cookies["isLogin"] ?? "";
-        var showLoginSuccessOnHome = TempData["LoginSuccess"] != null && !string.IsNullOrEmpty(isLoginCookieForPopup) && isLoginCookieForPopup.ToLower() == "true";
+        var showLoginSuccessOnHome = TempData["LoginSuccess"] != null && User.Identity?.IsAuthenticated == true;
     }
     @if (showLoginSuccessOnHome)
     {
@@ -245,3 +250,4 @@
         </text>
     }
 }
+

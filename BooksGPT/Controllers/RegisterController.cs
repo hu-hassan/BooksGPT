@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using BooksGPT.Models;
 using System.Net.Mail;
 using System.Net;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 
 namespace BooksGPT.Controllers
 {
@@ -15,11 +18,13 @@ namespace BooksGPT.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<RegisterController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public RegisterController(AppDbContext context, ILogger<RegisterController> logger)
+        public RegisterController(AppDbContext context, ILogger<RegisterController> logger, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
+            _configuration = configuration;
         }
 
         private static string GenerateRandomColor()
@@ -31,8 +36,7 @@ namespace BooksGPT.Controllers
         // GET: Register
         public async Task<IActionResult> Index()
         {
-            Request.Cookies.TryGetValue("isLogin", out var isLogin);
-            if (!string.IsNullOrEmpty(isLogin) && isLogin.ToLower() == "true")
+            if (User.Identity?.IsAuthenticated == true)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -150,7 +154,7 @@ namespace BooksGPT.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> VerifyEmail2( string verificationCode)
+        public async Task<IActionResult> VerifyEmail2(string verificationCode)
         {
             Request.Cookies.TryGetValue("email", out var email);
             var verification = await _context.EmailVerifications
@@ -158,22 +162,31 @@ namespace BooksGPT.Controllers
                 .FirstOrDefaultAsync();
             if (verification != null)
             {
-                // Verification successful
-                verification.IsExpired = true; // Mark as used
-                await _context.SaveChangesAsync();
-                Response.Cookies.Append("email", "", new Microsoft.AspNetCore.Http.CookieOptions
+                verification.IsExpired = true;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+                if (user != null)
                 {
-                    HttpOnly = true,
-                    Secure = true, // Set to true if your site uses HTTPS
-                    SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict
-                });
-                return RedirectToAction("Index", "Home"); // Redirect to home or another page
+                    user.IsEmailVerified = true;
+                    await _context.SaveChangesAsync();
+
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Email, email),
+                        new Claim(ClaimTypes.Name, user.Name ?? ""),
+                        new Claim("AvatarColor", user.AvatarColor ?? "#6b7280"),
+                        new Claim(ClaimTypes.GivenName, user.Username ?? "")
+                    };
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                }
+                return Json(new { success = true });
             }
             else
             {
-                // Verification failed
-                ModelState.AddModelError("", "Invalid or expired verification code.");
-                return View("VerifyEmail");
+                return Json(new { success = false, message = "Invalid or expired verification code." });
             }
         }
 
@@ -185,16 +198,19 @@ namespace BooksGPT.Controllers
 
         public async Task SendVerificationEmailAsync(string email, string code)
         {
+            var smtpEmail = _configuration["Smtp:Email"] ?? Environment.GetEnvironmentVariable("SMTP_EMAIL") ?? "";
+            var smtpPassword = _configuration["Smtp:Password"] ?? Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? "";
+
             var smtpClient = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,
-                Credentials = new NetworkCredential("hassan.hu.usman@gmail.com", "gcayiepgicqlazso"),
+                Credentials = new NetworkCredential(smtpEmail, smtpPassword),
                 EnableSsl = true,
             };
 
             var message = new MailMessage
             {
-                From = new MailAddress("hassan.hu.usman@gmail.com", "BooksGPT"),
+                From = new MailAddress(smtpEmail, "BooksGPT"),
                 Subject = "Email Verification Code",
                 Body = $"Your verification code is <b>{code}</b>. It will expire in 10 minutes.",
                 IsBodyHtml = true

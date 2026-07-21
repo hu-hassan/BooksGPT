@@ -13,11 +13,7 @@ namespace BooksGPT.Constants
         public const string SESSION_CAN_SAY = "canSay";
         public const string SESSION_BOOK_AUTHOR = "bookAuthor";
 
-        // Cookie Names
-        public const string COOKIE_IS_LOGIN = "isLogin";
-        public const string COOKIE_EMAIL = "email";
-        public const string COOKIE_NAME = "name";
-        public const string COOKIE_AVATAR_COLOR = "avatarColor";
+        // Cookie Names (non-auth)
         public const string COOKIE_CAN_SAY_NO = "canSayNo";
         public const string COOKIE_BOOK_TITLE = "bookTitle";
         public const string COOKIE_BOOK_AUTHOR = "bookAuthor";

@@ -54,22 +54,27 @@
 
                 $(document).ready(function () {
                 $('#submit-button').click(function (e) {
-                    e.preventDefault(); // Prevent default form submission
+                    e.preventDefault();
 
                     var form = $(this).closest('form')[0];
                     if (!form.checkValidity()) {
-                        form.reportValidity(); // Show validation errors
+                        form.reportValidity();
                         return;
                     }
 
             var verificationCode = $('#verificationCode').val();
+            var errorSpan = $('#verificationCode').siblings('span.text-red-500');
 
                     $.ajax({
                         url: '/Register/VerifyEmail2',
                         type: 'POST',
                 data: { verificationCode: verificationCode },
-                        success: function () {
+                        success: function (response) {
+                            if (response.success) {
                                 window.location.href = '/';
+                            } else {
+                                errorSpan.text(response.message);
+                            }
                         },
                         error: function () {
                             console.error('Error during registration:', arguments[0]);

@@ -282,8 +282,6 @@
                     alert(resp?.error || 'Failed');
                     return;
                 }
-                setCookie('name', newName);
-                setCookie('avatarColor', newColor);
                 $('#left-user-name').text(newName || 'Guest');
                 $('#left-avatar').css('background', newColor || '#6b7280');
                 // Also update mobile sidebar
@@ -302,9 +300,9 @@
             }
         });
 
-        // History menu toggle (desktop only — mobile has its own handler below)
+        // History menu toggle (desktop only ï¿½ mobile has its own handler below)
         $(document).on('click', '.history-menu-btn', function (e) {
-            // Skip if inside mobile sidebar — handled separately with fixed positioning
+            // Skip if inside mobile sidebar ï¿½ handled separately with fixed positioning
             if ($(this).closest('.mobile-sidebar-list').length) return;
             e.stopPropagation();
             var $menu = $(this).siblings('.history-menu');
@@ -403,7 +401,7 @@
             }
         });
 
-        // Menu toggle for mobile sidebar items — same as desktop, just toggle
+        // Menu toggle for mobile sidebar items ï¿½ same as desktop, just toggle
         $(document).on('click', '.mobile-sidebar-list .history-menu-btn', function(e) {
             e.preventDefault();
             e.stopPropagation();

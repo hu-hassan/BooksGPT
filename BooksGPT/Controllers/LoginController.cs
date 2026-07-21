@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BooksGPT.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using log4net;
 
 namespace BooksGPT.Controllers
@@ -56,50 +59,29 @@ namespace BooksGPT.Controllers
             // Hash the mixed string
             string hashedMixedPassword = BooksGPT.Views.Auth.PasswordHelper.GetHashPassword(mixed);
 
-            // Compare with stored password
+            if (!user.IsEmailVerified)
+            {
+                ModelState.AddModelError("", "Please verify your email before logging in.");
+                return View();
+            }
+
             if (hashedMixedPassword == user.Password && password.Count() == sizeofpassword)
             {
-                // Authentication successful
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, email),
+                    new Claim(ClaimTypes.Name, user.Name ?? ""),
+                    new Claim("AvatarColor", user.AvatarColor ?? "#6b7280"),
+                    new Claim(ClaimTypes.GivenName, user.Username ?? "")
+                };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
                 TempData["LoginSuccess"] = true;
-                Response.Cookies.Append("isLogin", true.ToString(), new Microsoft.AspNetCore.Http.CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true, // Set to true if your site uses HTTPS
-                    SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict
-                });
 
-                Response.Cookies.Append("email", email, new Microsoft.AspNetCore.Http.CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true, // Set to true if your site uses HTTPS
-                    SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict
-                });
-
-                // set name and avatar color cookies
-                try
-                {
-                    if (!string.IsNullOrEmpty(user.Name))
-                    {
-                        Response.Cookies.Append("name", user.Name, new Microsoft.AspNetCore.Http.CookieOptions
-                        {
-                            HttpOnly = true,
-                            Secure = true,
-                            SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict
-                        });
-                    }
-                    if (!string.IsNullOrEmpty(user.AvatarColor))
-                    {
-                        Response.Cookies.Append("avatarColor", user.AvatarColor, new Microsoft.AspNetCore.Http.CookieOptions
-                        {
-                            HttpOnly = true,
-                            Secure = true,
-                            SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict
-                        });
-                    }
-                }
-                catch { }
-
-                // stay on the login page so the client-side popup can control navigation
                 return View();
             }
             else
@@ -110,27 +92,10 @@ namespace BooksGPT.Controllers
         }
 
         [HttpPost]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            // clear auth cookies using Delete so browser removes them
-            var cookieOptions = new Microsoft.AspNetCore.Http.CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
-                Path = "/"
-            };
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            try
-            {
-                Response.Cookies.Delete("isLogin", cookieOptions);
-                Response.Cookies.Delete("email", cookieOptions);
-                Response.Cookies.Delete("name", cookieOptions);
-                Response.Cookies.Delete("avatarColor", cookieOptions);
-            }
-            catch { }
-
-            // clear TempData and session to avoid leftover flags
             TempData.Remove("LoginSuccess");
             HttpContext.Session.Clear();
 
